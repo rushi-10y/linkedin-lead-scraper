@@ -1,0 +1,5 @@
+- [x] Edit src/main.jsx to import BrowserRouter and wrap App with it
+- [x] Run development server to verify the router error is resolved
+- [x] Fix BrowserRouter future props warning
+- [x] Configure Vite to run on port 5173
+- [x] Make sidebar responsive to window resize

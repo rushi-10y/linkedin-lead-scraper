@@ -1,0 +1,37 @@
+{
+  "name": "leadscraper-backend",
+  "version": "1.0.0",
+  "description": "Backend for Lead Scraper Pro",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies": {
+    "axios": "^1.13.5",
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "erpnext-lead-scraper": "file:..",
+    "exceljs": "^4.4.0",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "http-proxy-middleware": "^3.0.5",
+    "json2csv": "^6.0.0-alpha.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^7.5.0",
+    "multer": "^1.4.5-lts.1",
+    "winston": "^3.19.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "lead-generation",
+    "scraping",
+    "api"
+  ],
+  "author": "",
+  "license": "ISC"
+}

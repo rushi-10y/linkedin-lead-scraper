@@ -1,0 +1,37 @@
+{
+  "name": "erpnext-lead-scraper",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Monorepo runner for backend, api, frontend, and python scraper/scheduler",
+  "scripts": {
+    "install:backend": "npm --prefix backend install",
+    "install:api": "npm --prefix api install",
+    "install:frontend": "npm --prefix frontend install",
+    "install:ui": "npm --prefix \"frontend/linkedin-web-scraping\" install",
+    "install:all": "npm run install:backend && npm run install:api && npm run install:frontend && npm run install:ui",
+
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:api": "npm --prefix api run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:ui": "npm --prefix \"frontend/linkedin-web-scraping\" run dev",
+    "dev": "concurrently -k -n backend,frontend -c green,magenta \"npm run dev:backend\" \"npm run dev:frontend\"",
+
+    "build:frontend": "npm --prefix frontend run build",
+    "build:frontend:watch": "npm --prefix frontend run build -- --watch",
+    "dev:single": "concurrently -k -n frontend-build,backend -c magenta,green \"npm run build:frontend:watch\" \"set NODE_ENV=production&& npm run dev:backend\"",
+    "start:single": "npm run build:frontend && set NODE_ENV=production&& npm run start:backend",
+
+    "start:backend": "npm --prefix backend run start",
+    "start:api": "npm --prefix api run start",
+    "start:frontend": "npm --prefix frontend run preview",
+    "start:ui": "npm --prefix \"frontend/linkedin-web-scraping\" run preview",
+
+    "py:install": "python -m pip install -r requirements.txt",
+    "py:scrape": "python scraper/leadScraper.py",
+    "py:scheduler": "python scheduler/cronScheduler.py"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
+

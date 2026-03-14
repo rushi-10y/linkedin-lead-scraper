@@ -1,0 +1,7 @@
+selenium
+pymongo
+openpyxl
+schedule
+webdriver-manager
+python-dotenv
+
