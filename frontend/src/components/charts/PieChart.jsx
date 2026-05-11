@@ -4,9 +4,9 @@ const PieChart = ({ data, title }) => {
   const total = data.reduce((sum, item) => sum + item.value, 0);
   if (total === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold mb-4">{title}</h3>
-        <p className="text-sm text-gray-500">No data available</p>
+      <div className="chart-card">
+        <h3>{title}</h3>
+        <p className="text-sm text-slate-400">No data available</p>
       </div>
     );
   }

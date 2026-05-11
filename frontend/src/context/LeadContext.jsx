@@ -7,6 +7,7 @@ import React, {
   useRef,
   useState
 } from 'react';
+import leadService from '../services/lead.service.js';
 
 const LeadContext = createContext(null);
 
@@ -17,75 +18,57 @@ export const LeadProvider = ({ children }) => {
   const fetchingRef = useRef(false);
 
   const fetchLeads = useCallback(async () => {
-    if (fetchingRef.current) return; // Prevent duplicate calls
+    if (fetchingRef.current) return;
 
     fetchingRef.current = true;
     setLoading(true);
     setError(null);
 
     try {
-      // Simulated API
-      // await new Promise((res) => setTimeout(res, 1000));
-
-      setLeads([
-        {
-          id: '1',
-          name: 'John Doe',
-          email: 'john@example.com',
-          company: 'Tech Corp',
-          status: 'new',
-          value: 5000,
-          source: 'linkedin',
-          createdAt: '2025-01-20'
-        },
-        {
-          id: '2',
-          name: 'Jane Smith',
-          email: 'jane@acme.com',
-          company: 'Acme Inc',
-          status: 'contacted',
-          value: 12000,
-          source: 'manual',
-          createdAt: '2025-01-18'
-        },
-        {
-          id: '3',
-          name: 'Bob Johnson',
-          email: 'bob@startup.io',
-          company: 'StartupIO',
-          status: 'qualified',
-          value: 8500,
-          source: 'scrape',
-          createdAt: '2025-01-15'
-        }
-      ]);
+      const response = await leadService.getLeads({ limit: 100 });
+      setLeads(response.data || response.leads || []);
     } catch (err) {
-      setError('Failed to load leads');
+      console.error('Fetch leads error:', err);
+      setError(err.message || 'Failed to load leads');
+      setLeads([]);
     } finally {
       setLoading(false);
       fetchingRef.current = false;
     }
   }, []);
 
-  const addLead = (lead) => {
-    const newLead = {
-      ...lead,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString()
-    };
-    setLeads((prev) => [newLead, ...prev]);
+  const addLead = async (lead) => {
+    try {
+      const newLead = await leadService.createLead(lead);
+      setLeads((prev) => [newLead.data || newLead, ...prev]);
+    } catch (err) {
+      console.error('Add lead error:', err);
+      throw err;
+    }
   };
 
-  const updateLead = (id, updates) => {
-    setLeads((prev) =>
-      prev.map((lead) =>
-        lead.id === id ? { ...lead, ...updates } : lead
-      )
-    );
+  const updateLead = async (id, updates) => {
+    try {
+      const updatedLead = await leadService.updateLead(id, updates);
+      setLeads((prev) =>
+        prev.map((lead) =>
+          (lead.id === id || lead._id === id) ? (updatedLead.data || updatedLead) : lead
+        )
+      );
+    } catch (err) {
+      console.error('Update lead error:', err);
+      throw err;
+    }
   };
 
-  const deleteLead = (id) => {
-    setLeads((prev) => prev.filter((lead) => lead.id !== id));
+  const deleteLead = async (id) => {
+    try {
+      await leadService.deleteLead(id);
+      setLeads((prev) => prev.filter((lead) => lead.id !== id && lead._id !== id));
+    } catch (err) {
+      console.error('Delete lead error:', err);
+      throw err;
+    }
   };
 
   // 🔥 Derived helpers (very useful)

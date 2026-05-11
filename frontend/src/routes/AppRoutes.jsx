@@ -17,9 +17,6 @@ import Profile from '../pages/settings/Profile.jsx';
 import Roles from '../pages/settings/Roles.jsx';
 import Users from '../pages/settings/Users.jsx';
 
-import KeywordInput from '../pages/scraping/KeywordInput.jsx';
-import LinkedInInput from '../pages/scraping/LinkedInInput.jsx';
-import ManualTrigger from '../pages/scraping/ManualTrigger.jsx';
 import ScrapeJobs from '../pages/scraping/ScrapeJobs.jsx';
 
 import PrivateRoute from './PrivateRoute.jsx';
@@ -59,9 +56,9 @@ function AppRoutes() {
         {/* Scraping */}
         <Route path="/scraping" element={<Navigate to="/scraping/jobs" />} />
         <Route path="/scraping/jobs" element={<ScrapeJobs />} />
-        <Route path="/scraping/keyword" element={<KeywordInput />} />
-        <Route path="/scraping/linkedin" element={<LinkedInInput />} />
-        <Route path="/scraping/manual" element={<ManualTrigger />} />
+        <Route path="/scraping/keyword" element={<Navigate to="/scraping/jobs" replace />} />
+        <Route path="/scraping/linkedin" element={<Navigate to="/scraping/jobs" replace />} />
+        <Route path="/scraping/manual" element={<Navigate to="/scraping/jobs" replace />} />
 
         {/* Settings */}
         <Route path="/settings" element={<Navigate to="/settings/profile" />} />

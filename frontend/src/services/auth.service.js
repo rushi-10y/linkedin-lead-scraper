@@ -1,57 +1,43 @@
+import api from './api.js';
+
+const unwrapData = (response) => response?.data || response;
+
 class AuthService {
   async login(credentials) {
     if (!credentials?.email || !credentials?.password) {
       throw new Error('Email and password are required');
     }
+    const response = await api.post('/auth/login', credentials);
+    return unwrapData(response);
+  }
 
-    // Simulated API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const response = {
-          user: {
-            id: 1,
-            name: 'John Doe',
-            email: credentials.email,
-            role: 'admin'
-          },
-          token: 'fake-jwt-token'
-        };
-
-        localStorage.setItem('user', JSON.stringify(response.user));
-        localStorage.setItem('token', response.token);
-
-        resolve(response);
-      }, 1000);
-    });
+  async register(userData) {
+    if (!userData?.email || !userData?.password) {
+      throw new Error('Email and password are required');
+    }
+    const response = await api.post('/auth/register', userData);
+    return unwrapData(response);
   }
 
   async logout() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        resolve({ success: true });
-      }, 500);
-    });
+    try {
+      await api.post('/auth/logout');
+    } catch (err) {
+      // Ignore logout API error
+    }
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    return { success: true };
   }
 
   async getCurrentUser() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const user = localStorage.getItem('user');
-        resolve(user ? JSON.parse(user) : null);
-      }, 300);
-    });
+    const response = await api.get('/auth/me');
+    return unwrapData(response);
   }
 
   async refreshToken() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const newToken = 'new-fake-jwt-token';
-        localStorage.setItem('token', newToken);
-        resolve({ token: newToken });
-      }, 500);
-    });
+    const response = await api.post('/auth/refresh');
+    return unwrapData(response);
   }
 
   isAuthenticated() {

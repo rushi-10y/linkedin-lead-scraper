@@ -1,4 +1,4 @@
-import api from './apiService';
+import api from './api.js';
 
 class LeadService {
   async getLeads(params = {}) {
@@ -15,6 +15,14 @@ class LeadService {
       return await api.post('/leads', data);
     } catch (error) {
       throw new Error(error.message || 'Failed to create lead');
+    }
+  }
+
+  async scrapeLeads(data) {
+    try {
+      return await api.post('/leads/scrape', data);
+    } catch (error) {
+      throw new Error(error.message || 'Failed to scrape leads');
     }
   }
 
@@ -43,11 +51,7 @@ class LeadService {
         formData.append(key, value)
       );
 
-      return await api.request('/leads/import', {
-        method: 'POST',
-        body: formData,
-        headers: {} // Let browser set multipart boundary
-      });
+      return await api.post('/leads/import', formData);
     } catch (error) {
       throw new Error(error.message || 'Failed to import leads');
     }
@@ -56,7 +60,7 @@ class LeadService {
   async exportLeads(filters = {}) {
     try {
       const query = new URLSearchParams(filters).toString();
-      return await api.get(`/leads/export?${query}`);
+      return await api.get(`/leads/export${query ? `?${query}` : ''}`);
     } catch (error) {
       throw new Error(error.message || 'Failed to export leads');
     }

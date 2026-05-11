@@ -10,16 +10,21 @@ dotenv.config();
  */
 const requiredEnvVars = [
   "PORT",
-  "MONGO_URI",
   "JWT_SECRET"
 ];
 
 // For development, use defaults if not provided
 const defaults = {
-  PORT: process.env.PORT || 5000,
-  MONGO_URI: process.env.MONGO_URI || "mongodb://localhost:27017/leadscraper",
+  PORT: process.env.PORT || 3000,
+  MONGO_URI:
+    process.env.MONGODB_URI ||
+    process.env.MONGO_URI ||
+    "mongodb://127.0.0.1:27017/leadscraper",
   JWT_SECRET: process.env.JWT_SECRET || "dev-secret-key-change-in-production",
-  NODE_ENV: process.env.NODE_ENV || "development"
+  SCRAPING_API_KEY: process.env.SCRAPING_API_KEY || "f705c74115eeb8416e570dde6aa1f812",
+  NODE_ENV: process.env.NODE_ENV || "development",
+  FRONTEND_DEV_URL: process.env.FRONTEND_DEV_URL || "http://localhost:3001",
+  ALLOW_DEV_AUTH_BYPASS: process.env.ALLOW_DEV_AUTH_BYPASS || "true"
 };
 
 requiredEnvVars.forEach((key) => {

@@ -1,0 +1,69 @@
+
+> erpnext-lead-scraper@0.0.0 dev
+> npm run dev:single
+
+
+> erpnext-lead-scraper@0.0.0 dev:single
+> concurrently -k -n frontend-build,backend -c magenta,green "npm run build:frontend:watch" "npm run dev:backend:single"
+
+[frontend-build] 
+[frontend-build] > erpnext-lead-scraper@0.0.0 build:frontend:watch
+[frontend-build] > npm --prefix frontend run build -- --watch
+[frontend-build] 
+[backend] 
+[backend] > erpnext-lead-scraper@0.0.0 dev:backend:single
+[backend] > npm --prefix backend run dev:single
+[backend] 
+[frontend-build] 
+[frontend-build] > leadscraper-pro@1.0.0 build
+[frontend-build] > vite build --watch
+[frontend-build] 
+[backend] 
+[backend] > leadscraper-backend@1.0.0 dev:single
+[backend] > set NODE_ENV=production && nodemon src/server.js
+[backend] 
+[backend] [33m[nodemon] 3.1.11[39m
+[backend] [33m[nodemon] to restart at any time, enter `rs`[39m
+[backend] [33m[nodemon] watching path(s): *.*[39m
+[backend] [33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[backend] [32m[nodemon] starting `node src/server.js`[39m
+[frontend-build] [36mvite v4.5.14 [32mbuilding for production...[36m[39m
+[frontend-build] [36m
+[frontend-build] watching for file changes...[39m
+[frontend-build] [36m
+[frontend-build] build started...[39m
+[frontend-build] transforming...
+[backend] 2026-04-15 10:55:06 [ERROR]: Error: listen EADDRINUSE: address already in use :::5000
+[backend]     at Server.setupListenHandle [as _listen2] (node:net:1940:16)
+[backend]     at listenInCluster (node:net:1997:12)
+[backend]     at Server.listen (node:net:2102:7)
+[backend]     at Function.listen (C:\Users\rushi\Downloads\Linkedin Web scraping\backend\node_modules\express\lib\application.js:635:24)
+[backend]     at Object.<anonymous> (C:\Users\rushi\Downloads\Linkedin Web scraping\backend\src\server.js:115:20)
+[backend]     at Module._compile (node:internal/modules/cjs/loader:1730:14)
+[backend]     at Object..js (node:internal/modules/cjs/loader:1895:10)
+[backend]     at Module.load (node:internal/modules/cjs/loader:1465:32)
+[backend]     at Function._load (node:internal/modules/cjs/loader:1282:12)
+[backend]     at TracingChannel.traceS[backend] (node:11460) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+[backend] (Use `node --trace-deprecation ...` to show where the warning was created)
+[backend] 2026-04-15 10:55:12 [INFO]: ::1 - - [15/Apr/2026:05:25:12 +0000] "GET /api/health HTTP/1.1" 200 64 "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-IN) WindowsPowerShell/5.1.26100.8115"
+[backend] 2026-04-15 10:55:12 [INFO]: ::1 - - [15/Apr/2026:05:25:12 +0000] "GET / HTTP/1.1" 504 - "-" "Mozilla/5.0 (Windows NT; Windows NT 10.0; en-IN) WindowsPowerShell/5.1.26100.8115"
+[backend] [32m[nodemon] restarting child process[39m
+[backend] [32m[nodemon] starting `node src/server.js`[39m
+[backend] 2026-04-15 10:55:18 [INFO]: 🚀 Server running on port 5000
+[backend] 2026-04-15 10:55:18 [INFO]: MongoDB Connected: localhost
+[backend] ^C^CTerminate batch job (Y/N)? 
+[frontend-build] ^C^CTerminate batch job (Y/N)? 
+[backend] ^C
+[backend] npm run dev:backend:single exited with code 3221225786
+--> Sending SIGTERM to other processes..
+[frontend-build] npm run build:frontend:watch exited with code 3221225786
+39m
+[backend] [32m[nodemon] restarting child process[39m
+[backend] [32m[nodemon] starting `node src/server.js`[39m
+[backend] 2026-04-15 10:55:16 [INFO]: 🚀 Server running on port 5000
+[backend] 2026-04-15 10:55:16 [INFO]: MongoDB Connected: localhost
+[backend] ^C^CTerminate batch job (Y/N)? 
+[frontend-build] ^C^C
+[backend] npm run dev:backend:single exited with code 3221225786
+--> Sending SIGTERM to other processes..
+[frontend-build] npm run build:frontend:watch exited with code 3221225786

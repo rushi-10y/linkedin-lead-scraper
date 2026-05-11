@@ -11,14 +11,20 @@ const safeParse = (value) => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState({ id: 1, name: 'Test User', email: 'test@example.com' });
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem('user');
-    if (saved) {
-      setUser(safeParse(saved));
+    const savedUser = localStorage.getItem('user');
+    const savedToken = localStorage.getItem('token');
+    if (savedUser) {
+      setUser(safeParse(savedUser));
     }
+    if (savedToken) {
+      setToken(savedToken);
+    }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -26,29 +32,37 @@ export const AuthProvider = ({ children }) => {
       if (e.key === 'user') {
         setUser(e.newValue ? safeParse(e.newValue) : null);
       }
+      if (e.key === 'token') {
+        setToken(e.newValue || null);
+      }
     };
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  const login = (userData) => {
+  const login = (userData, tokenData) => {
     setUser(userData);
+    setToken(tokenData);
     localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', tokenData);
   };
 
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        token,
         login,
         logout,
         loading,
-        isAuthenticated: !!user
+        isAuthenticated: !!user && !!token
       }}
     >
       {children}

@@ -10,7 +10,7 @@ const JobSchema = new mongoose.Schema(
 
     source: {
       type: String,
-      enum: ["google", "website", "linkedin"],
+      enum: ["google", "website", "linkedin", "google_keywords", "config", "api", "jobs"],
       required: true,
       index: true
     },

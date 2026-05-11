@@ -1,28 +1,42 @@
 const Lead = require("../models/Lead.model");
+const leadService = require("../services/lead.service");
+const {
+  MINIMUM_LEADS,
+  scrapeLeadsByKeywordAndLocation
+} = require("../services/scraping/manualLeadScrape.service");
 const logger = require("../utils/logger");
+const multer = require("multer");
+const XLSX = require("xlsx");
 
-/**
- * Create a new lead
- */
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (
+      file.mimetype === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      file.mimetype === "application/vnd.ms-excel" ||
+      file.mimetype === "text/csv"
+    ) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only Excel/CSV files allowed"), false);
+    }
+  }
+});
+
 const createLead = async (req, res) => {
   try {
     const leadData = req.body;
 
-    // Check if lead with same email already exists
-    if (leadData.email) {
-      const existingLead = await Lead.findOne({ email: leadData.email });
-      if (existingLead) {
-        return res.status(400).json({
-          success: false,
-          message: "Lead with this email already exists"
-        });
-      }
+    if (!leadData.name) {
+      return res.status(400).json({
+        success: false,
+        message: "Name is required"
+      });
     }
 
-    const lead = new Lead(leadData);
-    await lead.save();
-
-    logger.info(`Lead created: ${lead._id}`);
+    const lead = await leadService.createLead(leadData);
 
     res.status(201).json({
       success: true,
@@ -39,31 +53,59 @@ const createLead = async (req, res) => {
   }
 };
 
-/**
- * Get all leads with pagination
- */
+const scrapeLeads = async (req, res) => {
+  try {
+    const keyword = req.body.keyword?.trim();
+    const location = req.body.location?.trim();
+
+    if (!keyword || !location) {
+      return res.status(400).json({
+        success: false,
+        message: "Keyword and location are required"
+      });
+    }
+
+    const scrapedLeads = await scrapeLeadsByKeywordAndLocation({ keyword, location });
+    const savedLeads = await leadService.saveScrapedLeads(scrapedLeads);
+
+    res.status(201).json({
+      success: true,
+      message: `Stored ${savedLeads.length} leads`,
+      data: savedLeads,
+      meta: {
+        keyword,
+        location,
+        minimumRequested: MINIMUM_LEADS,
+        stored: savedLeads.length
+      }
+    });
+  } catch (error) {
+    logger.error("Scrape leads error", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to scrape leads",
+      error: error.message
+    });
+  }
+};
+
 const getAllLeads = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
+    const filters = {
+      keyword: req.query.keyword,
+      location: req.query.location,
+      source: req.query.source,
+      company: req.query.company
+    };
 
-    const leads = await Lead.find()
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
-
-    const total = await Lead.countDocuments();
+    const { leads, pagination } = await leadService.getLeads(page, limit, filters);
 
     res.json({
       success: true,
       data: leads,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
-      }
+      pagination
     });
   } catch (error) {
     logger.error("Get all leads error", error);
@@ -75,9 +117,6 @@ const getAllLeads = async (req, res) => {
   }
 };
 
-/**
- * Get lead by ID
- */
 const getLeadById = async (req, res) => {
   try {
     const lead = await Lead.findById(req.params.id);
@@ -95,33 +134,16 @@ const getLeadById = async (req, res) => {
     });
   } catch (error) {
     logger.error("Get lead by ID error", error);
-    res.status(500).json({
+    res.status(400).json({
       success: false,
-      message: "Failed to fetch lead",
-      error: error.message
+      message: "Invalid lead ID"
     });
   }
 };
 
-/**
- * Update lead
- */
 const updateLead = async (req, res) => {
   try {
-    const lead = await Lead.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
-
-    if (!lead) {
-      return res.status(404).json({
-        success: false,
-        message: "Lead not found"
-      });
-    }
-
-    logger.info(`Lead updated: ${lead._id}`);
+    const lead = await leadService.updateLead(req.params.id, req.body);
 
     res.json({
       success: true,
@@ -130,29 +152,17 @@ const updateLead = async (req, res) => {
     });
   } catch (error) {
     logger.error("Update lead error", error);
-    res.status(500).json({
+    res.status(error.message === "Lead not found" ? 404 : 500).json({
       success: false,
-      message: "Failed to update lead",
+      message: error.message === "Lead not found" ? error.message : "Failed to update lead",
       error: error.message
     });
   }
 };
 
-/**
- * Delete lead
- */
 const deleteLead = async (req, res) => {
   try {
-    const lead = await Lead.findByIdAndDelete(req.params.id);
-
-    if (!lead) {
-      return res.status(404).json({
-        success: false,
-        message: "Lead not found"
-      });
-    }
-
-    logger.info(`Lead deleted: ${lead._id}`);
+    await leadService.deleteLead(req.params.id);
 
     res.json({
       success: true,
@@ -160,28 +170,16 @@ const deleteLead = async (req, res) => {
     });
   } catch (error) {
     logger.error("Delete lead error", error);
-    res.status(500).json({
+    res.status(error.message === "Lead not found" ? 404 : 400).json({
       success: false,
-      message: "Failed to delete lead",
-      error: error.message
+      message: error.message === "Lead not found" ? error.message : "Invalid lead ID"
     });
   }
 };
 
-/**
- * Filter leads
- */
 const filterLeads = async (req, res) => {
   try {
-    const { industry, location, source, company } = req.query;
-    const filter = {};
-
-    if (industry) filter.industry = new RegExp(industry, 'i');
-    if (location) filter.location = new RegExp(location, 'i');
-    if (source) filter.source = source;
-    if (company) filter.company = new RegExp(company, 'i');
-
-    const leads = await Lead.find(filter).sort({ createdAt: -1 });
+    const leads = await leadService.filterLeads(req.query);
 
     res.json({
       success: true,
@@ -197,11 +195,95 @@ const filterLeads = async (req, res) => {
   }
 };
 
+const importLeads = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+    const leads = jsonData
+      .map((row) => ({
+        name: row.name || row.Name || "",
+        address: row.address || row.Address || "",
+        phone: row.phone || row.Phone || "",
+        website: row.website || row.Website || "",
+        keyword: row.keyword || row.Keyword || "",
+        location: row.location || row.Location || "",
+        email: row.email || row.Email || "",
+        company: row.company || row.Company || "",
+        linkedin_url: row.linkedin || row["LinkedIn URL"] || ""
+      }))
+      .filter((lead) => lead.name || lead.website);
+
+    const savedLeads = await leadService.saveScrapedLeads(leads);
+
+    res.json({
+      success: true,
+      message: `Imported ${savedLeads.length} leads`,
+      imported: savedLeads.length,
+      data: savedLeads
+    });
+  } catch (error) {
+    logger.error("Import leads error", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to import leads",
+      error: error.message
+    });
+  }
+};
+
+const exportLeads = async (req, res) => {
+  try {
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(parseInt(req.query.limit, 10) || 1000, 5000);
+    const { leads } = await leadService.getLeads(page, limit, req.query);
+
+    const csvData = leads.map((lead) => ({
+      name: lead.name,
+      address: lead.address,
+      phone: lead.phone,
+      website: lead.website,
+      keyword: lead.keyword,
+      location: lead.location,
+      source: lead.source
+    }));
+
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=leads-${Date.now()}.csv`
+    );
+
+    const csv = csvData
+      .map((row) => Object.values(row).map((value) => `"${value || ""}"`).join(","))
+      .join("\n");
+
+    res.send(csv);
+  } catch (error) {
+    logger.error("Export leads error", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to export leads",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   createLead,
+  scrapeLeads,
   getAllLeads,
   getLeadById,
   updateLead,
   deleteLead,
-  filterLeads
+  filterLeads,
+  importLeads,
+  exportLeads,
+  upload
 };

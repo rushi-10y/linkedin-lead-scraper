@@ -128,21 +128,21 @@ const Reports = () => {
       )}
 
       {/* Metrics */}
-      <div className="mt-6 bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold mb-4">Key Metrics</h2>
+      <div className="mt-6">
+        <h2 className="text-lg font-semibold text-slate-50 mb-4">Key Metrics</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {metrics.map((m) => (
-            <div key={m.label} className="text-center">
+            <div key={m.label} className="panel p-5 text-center">
               <p className={`text-2xl font-bold ${m.color}`}>
                 {m.value}
               </p>
-              <p className="text-sm text-gray-600">{m.label}</p>
+              <p className="mt-2 text-sm text-slate-400">{m.label}</p>
             </div>
           ))}
         </div>
 
         {exportMessage && (
-          <p className="text-green-600 text-sm mt-4">
+          <p className="text-emerald-400 text-sm mt-4">
             {exportMessage}
           </p>
         )}

@@ -1,70 +1,68 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
 
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
-    this.timeout = 15000; // 15 seconds
+    this.timeout = 15000;
+  }
+
+  buildUrl(endpoint) {
+    const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+    return `${this.baseURL}${normalizedEndpoint}`;
   }
 
   async request(endpoint, options = {}) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(
-      () => controller.abort(),
-      this.timeout
-    );
-
-    const url = `${this.baseURL}${endpoint}`;
-
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    const isFormData = options.body instanceof FormData;
     const headers = {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
+      ...((!isFormData && options.body) ? { "Content-Type": "application/json" } : {}),
+      ...(options.headers || {})
     };
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
       headers.Authorization = `Bearer ${token}`;
     }
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch(this.buildUrl(endpoint), {
         ...options,
         headers,
-        signal: controller.signal,
+        signal: controller.signal
       });
 
       clearTimeout(timeoutId);
 
-      // Handle auth expiry
       if (response.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-        throw new Error('Session expired. Please log in again.');
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+        throw new Error("Session expired. Please log in again.");
       }
 
-      // Handle no-content
       if (response.status === 204) {
         return null;
       }
 
-      const contentType = response.headers.get('content-type');
-      const data = contentType?.includes('application/json')
+      const contentType = response.headers.get("content-type") || "";
+      const data = contentType.includes("application/json")
         ? await response.json()
         : await response.text();
 
       if (!response.ok) {
-        throw new Error(
-          data?.message || `Request failed (${response.status})`
-        );
+        throw new Error(data?.message || `Request failed (${response.status})`);
       }
 
       return data;
     } catch (error) {
-      if (error.name === 'AbortError') {
-        throw new Error('Request timeout. Please try again.');
+      if (error.name === "AbortError") {
+        throw new Error("Request timeout. Please try again.");
       }
-      console.error('API error:', error);
+      console.error("API error:", error);
       throw error;
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
@@ -74,22 +72,39 @@ class ApiService {
 
   post(endpoint, data) {
     return this.request(endpoint, {
-      method: 'POST',
-      body: JSON.stringify(data),
+      method: "POST",
+      body: data instanceof FormData ? data : JSON.stringify(data)
     });
   }
 
   put(endpoint, data) {
     return this.request(endpoint, {
-      method: 'PUT',
-      body: JSON.stringify(data),
+      method: "PUT",
+      body: data instanceof FormData ? data : JSON.stringify(data)
     });
   }
 
   delete(endpoint) {
     return this.request(endpoint, {
-      method: 'DELETE',
+      method: "DELETE"
     });
+  }
+
+  async download(endpoint) {
+    const headers = {};
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    const response = await fetch(this.buildUrl(endpoint), { headers });
+
+    if (!response.ok) {
+      throw new Error(`Download failed (${response.status})`);
+    }
+
+    return response.blob();
   }
 }
 

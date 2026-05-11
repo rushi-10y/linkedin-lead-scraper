@@ -1,1 +1,0 @@
-export const mockLeads = [\n  {\n    _id: '1',\n    name: 'John Doe',\n    email: 'john@example.com',\n    phone: '+1-234-567-8900',\n    company: 'Tech Corp',\n    position: 'CEO',\n    linkedin: 'https://linkedin.com/in/johndoe',\n    source: 'linkedin',\n    status: 'new',\n    createdAt: new Date().toISOString()\n  },\n  // Add more mock data\n];

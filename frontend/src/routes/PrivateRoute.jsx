@@ -5,12 +5,13 @@ import Loader from '../components/common/Loader.jsx';
 const PrivateRoute = ({ children, roles }) => {
   const { user, isAuthenticated, loading } = useAuth();
   const location = useLocation();
+  const allowLocalDevBypass = import.meta.env.DEV;
 
   if (loading) {
     return <Loader />;
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !allowLocalDevBypass) {
     return (
       <Navigate
         to="/login"

@@ -1,0 +1,9 @@
+# DEPRECATED - Python dependencies (Node.js scraper replaces Python)
+# Move to Node.js versions above
+selenium
+pymongo
+openpyxl
+schedule
+webdriver-manager
+python-dotenv
+

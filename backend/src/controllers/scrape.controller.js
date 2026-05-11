@@ -1,59 +1,41 @@
+const leadService = require("../services/lead.service");
 const {
-  scrapeGoogle,
-  scrapeWebsite,
-  scrapeLinkedInPublic
-} = require("../services/scraping/scrape.service");
+  MINIMUM_LEADS,
+  scrapeLeadsByKeywordAndLocation
+} = require("../services/scraping/manualLeadScrape.service");
 
-/**
- * Trigger scraping based on source
- * Body:
- * {
- *   "source": "google | website | linkedin",
- *   "query": "ERP consultants in India",
- *   "url": "https://example.com"
- * }
- */
-exports.startScraping = async (req, res, next) => {
+exports.startScraping = async (req, res) => {
   try {
-    const { source, query, url } = req.body;
+    const keyword = req.body.keyword?.trim() || req.body.query?.trim();
+    const location = req.body.location?.trim() || req.body.options?.location?.trim();
 
-    if (!source) {
-      return res.status(400).json({ message: "Scraping source is required" });
+    if (!keyword || !location) {
+      return res.status(400).json({
+        success: false,
+        message: "Keyword and location are required"
+      });
     }
 
-    let result;
+    const scrapedLeads = await scrapeLeadsByKeywordAndLocation({ keyword, location });
+    const savedLeads = await leadService.saveScrapedLeads(scrapedLeads);
 
-    switch (source) {
-      case "google":
-        if (!query)
-          return res.status(400).json({ message: "Query is required" });
-        result = await scrapeGoogle(query);
-        break;
-
-      case "website":
-        if (!url)
-          return res.status(400).json({ message: "URL is required" });
-        result = await scrapeWebsite(url);
-        break;
-
-      case "linkedin":
-        if (!url)
-          return res.status(400).json({ message: "LinkedIn public URL required" });
-        result = await scrapeLinkedInPublic(url);
-        break;
-
-      default:
-        return res.status(400).json({ message: "Invalid scraping source" });
-    }
-
-    res.status(200).json({
+    res.json({
       success: true,
-      source,
-      totalLeads: result.length,
-      leads: result
+      message: `Stored ${savedLeads.length} leads`,
+      keyword,
+      location,
+      minimumRequested: MINIMUM_LEADS,
+      scraped: savedLeads.length,
+      saved: savedLeads.length,
+      data: savedLeads
     });
-
   } catch (error) {
-    next(error);
+    console.error("Scraping error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Scraping failed",
+      error: error.message
+    });
   }
 };

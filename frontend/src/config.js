@@ -1,7 +1,7 @@
 const config = Object.freeze({
   API_BASE_URL:
-    process.env.REACT_APP_API_BASE_URL?.trim() ||
-    'http://localhost:3001/api',
+    import.meta.env.VITE_API_URL?.trim() ||
+    '/api',
 
   APP_NAME: 'LeadScraper Pro',
   VERSION: '1.0.0',

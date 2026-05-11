@@ -13,33 +13,25 @@ erpnext-lead-scraper
 └── logs/
 ```
 
-## Setup
-### One-command automation (recommended)
+## Single Port Dev (localhost:3000)
 
-From the repo root:
+**Recommended:** Frontend dev server on :3001 (proxied), Backend APIs + UI proxy on :3000. Everything at **http://localhost:3000**.
 
-- Install everything:
-  - `npm install && npm run install:all`
-  - `npm run py:install`
-- Run everything (dev):
-  - `npm run dev`
+```
+npm run install:all
+npm run dev
+```
 
-### One-localhost (single port) mode
+Frontend auto-proxies `/api` → backend:3000  
+Backend auto-proxies UI → frontend:3001
 
-If you want **only** `http://localhost:5000` (no separate frontend dev server port), run:
+### Legacy Modes (port 5000)
+- Build+serve: `npm run dev:single` or `npm run start:single`
 
-- Dev (watch build + backend serves `frontend/dist`):
-  - `npm run dev:single`
-- Prod-like (build once + backend serves `frontend/dist`):
-  - `npm run start:single`
-
-### Manual setup (if needed)
-1. Backend: `cd backend && npm install && npm run dev`
-2. API: `cd api && npm install && npm run dev`
-3. Frontend: `cd frontend && npm install && npm run dev`
-4. Python: `pip install -r requirements.txt`
-5. Run scraper: `python scraper/leadScraper.py`
-6. Scheduler: `python scheduler/cronScheduler.py`
+## Manual
+1. Backend: `cd backend && npm i && npm run dev` (:3000)
+2. Frontend: `cd frontend && npm i && npm run dev` (:3001)
+3. Access: http://localhost:3000
 
 ## Integration
-Node API calls Python via child_process.spawn('python', ['scraper/leadScraper.py', args])
+Node calls Python scraper via child_process.

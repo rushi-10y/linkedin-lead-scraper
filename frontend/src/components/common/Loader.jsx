@@ -2,31 +2,30 @@ import React from 'react';
 
 const Loader = ({
   size = 'md',
-  color = 'blue',
   fullScreen = false,
   className = ''
 }) => {
   const sizes = {
-    sm: 'h-6 w-6',
-    md: 'h-10 w-10',
-    lg: 'h-14 w-14'
-  };
-
-  const colors = {
-    blue: 'border-blue-600',
-    gray: 'border-gray-600',
-    white: 'border-white'
+    sm: 'h-8 w-8',
+    md: 'h-12 w-12',
+    lg: 'h-16 w-16'
   };
 
   const spinner = (
     <div
-      className={`animate-spin rounded-full border-b-2 ${sizes[size]} ${colors[color]} ${className}`}
-    />
+      className={`relative ${sizes[size] || sizes.md} ${className}`}
+      aria-label="Loading"
+      role="status"
+    >
+      <div className="absolute inset-0 rounded-full border border-cyan-300/20" />
+      <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-cyan-300 border-r-sky-400 animate-spin" />
+      <div className="absolute inset-[22%] rounded-full bg-cyan-300/25 blur-sm" />
+    </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex min-h-[50vh] items-center justify-center">
         {spinner}
       </div>
     );

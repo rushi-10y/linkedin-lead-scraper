@@ -24,6 +24,11 @@ async function runScraperJob(jobData) {
         leads = await scrapeGoogle(jobData.query);
         break;
 
+      case "google_keywords":
+        const LeadScraperService = require("../services/scraping/leadScraper.service");
+        const keywordsFile = jobData.keywordsFile || '../../../../../data/keywords.xlsx';
+        return await LeadScraperService.scrapeLeads({ keywordsFile, platform: 'google' });
+
       case "website":
         leads = await scrapeWebsite(jobData.url);
         break;

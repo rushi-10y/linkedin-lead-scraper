@@ -13,7 +13,7 @@ export const UIProvider = ({ children }) => {
     return window.innerWidth >= 1024; // Default open on desktop
   });
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'light';
+    return localStorage.getItem('theme') || 'dark';
   });
 
   // Handle window resize to toggle sidebar
@@ -29,10 +29,9 @@ export const UIProvider = ({ children }) => {
 
   // Persist theme
   useEffect(() => {
-    document.documentElement.classList.toggle(
-      'dark',
-      theme === 'dark'
-    );
+    document.documentElement.dataset.theme = theme;
+    document.body.dataset.theme = theme;
+    document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
   }, [theme]);
 

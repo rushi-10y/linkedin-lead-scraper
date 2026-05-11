@@ -5,27 +5,28 @@
   "description": "Monorepo runner for backend, api, frontend, and python scraper/scheduler",
   "scripts": {
     "install:backend": "npm --prefix backend install",
+    "install:admin": "npm --prefix backend/admin install",
     "install:api": "npm --prefix api install",
     "install:frontend": "npm --prefix frontend install",
-    "install:ui": "npm --prefix \"frontend/linkedin-web-scraping\" install",
-    "install:all": "npm run install:backend && npm run install:api && npm run install:frontend && npm run install:ui",
-
+    "install:ui": "npm --prefix frontend install",
+    "install:all": "npm run install:backend && npm run install:admin && npm run install:api && npm run install:frontend",
     "dev:backend": "npm --prefix backend run dev",
+    "dev:backend:single": "npm --prefix backend run dev:single",
+    "dev:admin": "npm --prefix backend/admin run dev",
     "dev:api": "npm --prefix api run dev",
     "dev:frontend": "npm --prefix frontend run dev",
-    "dev:ui": "npm --prefix \"frontend/linkedin-web-scraping\" run dev",
-    "dev": "concurrently -k -n backend,frontend -c green,magenta \"npm run dev:backend\" \"npm run dev:frontend\"",
-
+    "dev:ui": "npm --prefix frontend run dev",
+    "dev:split": "concurrently -k -n frontend,backend -c magenta,green \"npm --prefix frontend run dev\" \"cd backend && npm run dev\"",
     "build:frontend": "npm --prefix frontend run build",
+    "build:admin": "npm --prefix backend/admin run build",
     "build:frontend:watch": "npm --prefix frontend run build -- --watch",
-    "dev:single": "concurrently -k -n frontend-build,backend -c magenta,green \"npm run build:frontend:watch\" \"set NODE_ENV=production&& npm run dev:backend\"",
-    "start:single": "npm run build:frontend && set NODE_ENV=production&& npm run start:backend",
-
+    "dev:single": "concurrently -k -n frontend-build,backend -c magenta,green \"npm run build:frontend:watch\" \"npm run dev:backend:single\"",
+    "dev": "npm run dev:split",
+    "start:single": "npm run build:frontend && npm run build:admin && set NODE_ENV=production&& npm run start:backend",
     "start:backend": "npm --prefix backend run start",
     "start:api": "npm --prefix api run start",
     "start:frontend": "npm --prefix frontend run preview",
-    "start:ui": "npm --prefix \"frontend/linkedin-web-scraping\" run preview",
-
+    "start:ui": "npm --prefix frontend run preview",
     "py:install": "python -m pip install -r requirements.txt",
     "py:scrape": "python scraper/leadScraper.py",
     "py:scheduler": "python scheduler/cronScheduler.py"
@@ -34,4 +35,3 @@
     "concurrently": "^9.2.1"
   }
 }
-
