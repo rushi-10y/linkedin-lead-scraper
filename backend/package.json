@@ -1,5 +1,5 @@
 {
-  "name": "leadscraper-backend",
+  "name": "backend",
   "version": "1.0.0",
   "description": "Backend for Lead Scraper Pro",
   "main": "src/server.js",
